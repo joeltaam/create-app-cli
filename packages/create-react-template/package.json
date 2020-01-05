@@ -1,0 +1,16 @@
+{
+  "name": "create-react-template",
+  "version": "1.0.0",
+  "license": "MIT",
+  "scripts": {
+    "clear": "rm -rf ./dist/*"
+  },
+  "devDependencies": {
+    "@types/react": "^16.9.17",
+    "@types/react-dom": "^16.9.4",
+    "@types/react-router": "^5.1.3"
+  },
+  "dependencies": {
+    "react-router": "^5.1.2"
+  }
+}

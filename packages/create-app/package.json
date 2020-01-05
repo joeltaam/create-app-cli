@@ -1,0 +1,34 @@
+{
+  "name": "create-app",
+  "version": "0.0.1",
+  "license": "MIT",
+  "scripts": {
+    "dev": "node_modules/.bin/tsc --watch --newLine lf"
+  },
+  "bin": {
+    "createApp": "./bin/createApp"
+  },
+  "devDependencies": {
+    "@types/extract-text-webpack-plugin": "^3.0.4",
+    "@types/fs-extra": "^8.0.1",
+    "@types/html-webpack-plugin": "^3.2.1",
+    "@types/webpack": "^4.41.1",
+    "@types/webpack-hot-middleware": "^2.25.0",
+    "@types/webpack-merge": "^4.1.5",
+    "@types/ws": "^6.0.4",
+    "commander": "^4.0.1",
+    "css-loader": "^3.4.1",
+    "extract-text-webpack-plugin": "^4.0.0-beta.0",
+    "fs-extra": "^8.1.0",
+    "html-webpack-plugin": "^3.2.0",
+    "less": "^3.10.3",
+    "less-loader": "^5.0.0",
+    "style-loader": "^1.1.2",
+    "ts-loader": "^6.2.1",
+    "typescript": "^3.7.4",
+    "webpack": "^4.41.5",
+    "webpack-hot-middleware": "^2.25.0",
+    "webpack-merge": "^4.2.2",
+    "ws": "^7.2.1"
+  }
+}
