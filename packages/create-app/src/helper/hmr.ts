@@ -2,19 +2,21 @@
 import Websocket from 'ws'
 import fs from 'fs'
 import path from 'path'
-import { EventEmitter } from './eventEmitter'
+import { Express } from "express-serve-static-core"
+import { EventEmitter } from './EventEmitter'
+import MemoryFileSystem from 'memory-fs'
 
 type EventName = 'connection' | 'reload'
 
 const PORT = 1081
 
 export class HMRCreator extends EventEmitter<{ connection: {} }> {
-  private workDir!: string
+  private outputPath!: string
   private ws!: Websocket
 
   constructor(workDir: string) {
     super()
-    this.workDir = workDir
+    this.outputPath = workDir
     // NOTE:自定义hmr端口
     const wss = new Websocket.Server({
       port: PORT,
@@ -29,8 +31,8 @@ export class HMRCreator extends EventEmitter<{ connection: {} }> {
     this.ws.send(eventName, cb)
   }
 
-  public injectWebSocketScript(app: HTTPServer) {
-    app.use((req, res, next) => {
+  public injectWebSocketScript(app: Express, fsy: MemoryFileSystem) {
+    app.get('/', (req, res) => {
       const url = req.url || '/'
       const injectScript = `<script>
       const socket = new WebSocket('ws://localhost:${PORT}')
@@ -44,15 +46,11 @@ export class HMRCreator extends EventEmitter<{ connection: {} }> {
         }
       })
       </script>`
-
-      const htmlBuffer = fs.readFileSync(path.resolve(this.workDir, 'dist/index.html'), {
-        encoding: 'utf-8',
-      })
+      const html = fsy.readFileSync(path.resolve(this.outputPath, 'index.html')).toString()
       if (url === '/') {
-        const body = htmlBuffer.replace('</body>', `${injectScript}</body>`)
+        const body = html.replace('</body>', `${injectScript}</body>`)
         res.end(body)
       }
-      next()
     })
   }
 }

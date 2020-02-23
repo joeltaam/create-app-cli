@@ -40,53 +40,29 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 /* eslint-disable require-jsdoc */
-var express_1 = __importDefault(require("express"));
-var path_1 = __importDefault(require("path"));
-var compilerCreator_1 = require("../compiler/compilerCreator");
-var hmr_1 = require("../helper/hmr");
-var app = express_1.default();
-var DevServer = /** @class */ (function () {
-    function DevServer(workDir) {
-        var _this = this;
-        this.workDir = workDir;
-        this.compiler = new compilerCreator_1.CompilerCreator(workDir);
-        this.initHMR();
-        var fs = this.compiler.fileSystem;
-        app.get('*', function (req, res) {
-            try {
-                if (path_1.default.extname(req.path) === '.css') {
-                    res.set({
-                        'Content-Type': 'text/css'
-                    });
-                }
-                res.end(fs.readFileSync(_this.compiler.ouputPath + req.path));
-            }
-            catch (e) {
-                res.set({
-                    'Content-Type': 'text/plain;charset=UTF-8'
-                });
-                res.status(404).end('未发现响应文件内容');
-            }
-        });
-        app.listen(3000);
+var readline_1 = __importDefault(require("readline"));
+var Question = /** @class */ (function () {
+    function Question(query) {
+        this.query = query;
+        //
     }
-    DevServer.prototype.initHMR = function () {
+    Question.prototype.getAnswer = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var hmr;
             var _this = this;
             return __generator(this, function (_a) {
-                hmr = new hmr_1.HMRCreator(this.compiler.ouputPath);
-                hmr.injectWebSocketScript(app, this.compiler.fileSystem);
-                hmr.on('connection', function () {
-                    _this.compiler.on('compiler', function () {
-                        _this.hmr.send('reload');
-                    });
-                });
-                this.hmr = hmr;
-                return [2 /*return*/];
+                return [2 /*return*/, new Promise(function (resolve) {
+                        var rl = readline_1.default.createInterface({
+                            input: process.stdin,
+                            output: process.stdout,
+                        });
+                        rl.question(_this.query, function (answer) {
+                            resolve(answer);
+                            rl.close();
+                        });
+                    })];
             });
         });
     };
-    return DevServer;
+    return Question;
 }());
-exports.DevServer = DevServer;
+exports.Question = Question;

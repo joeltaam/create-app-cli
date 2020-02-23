@@ -38,11 +38,13 @@ var HTTPServer = /** @class */ (function () {
     return HTTPServer;
 }());
 exports.HTTPServer = HTTPServer;
-exports.serverStatic = function (dir) { return function (req, res, next) {
+exports.serverStatic = function (fsy, dir) { return function (req, res, next) {
     var files = fs_1.default.readdirSync(dir);
     var url = req.url || '/';
     var fileName = url.substr(1);
-    var getBuffer = function (name) { return fs_1.default.readFileSync(path_1.default.resolve(dir, name)); };
+    var getBuffer = function (name) { return fsy.readFileSync(path_1.default.resolve(dir, name)); };
+    console.log('fuck--->', dir);
+    console.log('fuck--->', Object.keys(fsy));
     if (url === '/') {
         var indexBuffer = getBuffer('index.html');
         next();

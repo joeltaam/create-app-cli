@@ -1,13 +1,26 @@
 /* eslint-disable require-jsdoc */
 import webpack from 'webpack'
 import path from 'path'
+import * as fse from 'fs-extra'
 import merge from 'webpack-merge'
+import MemoryFileSystem from 'memory-fs'
+import HTMLWebpackPlugin from 'html-webpack-plugin'
+import Mfs from 'memory-fs'
+
 import baseConfig from './config/webpack.config.base'
 import devConfig from './config/webpack.config.dev'
-import HTMLWebpackPlugin from 'html-webpack-plugin'
-import { EventEmitter } from '../helper/eventEmitter'
+import { EventEmitter } from '../helper/EventEmitter'
+
+
+const SpeedMeasurePlugin = require('speed-measure-webpack-plugin')
+const smp = new SpeedMeasurePlugin()
+const fsy = new Mfs()
 
 export class CompilerCreator extends EventEmitter<{ compiler: {} }> {
+
+  public fileSystem!: MemoryFileSystem
+  public ouputPath = ''
+
   private workDir!: string
   private webpackCompiler!: webpack.Compiler
 
@@ -15,14 +28,20 @@ export class CompilerCreator extends EventEmitter<{ compiler: {} }> {
     super()
     this.workDir = workDir
     const compiler = webpack(
-      merge(
-        {
-          entry: path.resolve(this.workDir, 'src/index.tsx'),
-        },
-        baseConfig,
-        this.getDevConfig(),
-      ),
+      smp.wrap(
+        merge(
+          {
+            entry: path.resolve(this.workDir, 'src/index.tsx'),
+          },
+          baseConfig,
+          this.getDevConfig(),
+          this.getCustomConfig(),
+        ),
+      )
     )
+    compiler.outputFileSystem = fsy
+    this.fileSystem = fsy
+    this.ouputPath = compiler.options.output!.path!
     compiler.watch({}, (err, stats) => {
       if (!err) {
         console.log(
@@ -54,5 +73,15 @@ export class CompilerCreator extends EventEmitter<{ compiler: {} }> {
     return merge(base as any, {
       plugins,
     })
+  }
+
+  private getCustomConfig() {
+    const configPath = path.resolve(this.workDir, './config/webpack.config.dev.js')
+    if (!fse.existsSync(configPath)) {
+      return {}
+    } else {
+      const config = require(configPath)
+      return config
+    }
   }
 }

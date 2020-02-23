@@ -18,15 +18,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 /* eslint-disable require-jsdoc */
 var ws_1 = __importDefault(require("ws"));
-var fs_1 = __importDefault(require("fs"));
 var path_1 = __importDefault(require("path"));
-var eventEmitter_1 = require("./eventEmitter");
+var EventEmitter_1 = require("./EventEmitter");
 var PORT = 1081;
 var HMRCreator = /** @class */ (function (_super) {
     __extends(HMRCreator, _super);
     function HMRCreator(workDir) {
         var _this = _super.call(this) || this;
-        _this.workDir = workDir;
+        _this.outputPath = workDir;
         // NOTE:自定义hmr端口
         var wss = new ws_1.default.Server({
             port: PORT,
@@ -40,21 +39,18 @@ var HMRCreator = /** @class */ (function (_super) {
     HMRCreator.prototype.send = function (eventName, cb) {
         this.ws.send(eventName, cb);
     };
-    HMRCreator.prototype.injectWebSocketScript = function (app) {
+    HMRCreator.prototype.injectWebSocketScript = function (app, fsy) {
         var _this = this;
-        app.use(function (req, res, next) {
+        app.get('/', function (req, res) {
             var url = req.url || '/';
             var injectScript = "<script>\n      const socket = new WebSocket('ws://localhost:" + PORT + "')\n      socket.addEventListener('open', (event) => {\n        socket.send('[HMR] is Ready')\n        console.log('[HMR] Start')\n      })\n      socket.addEventListener('message', function(event) {\n        if (event.data === 'reload') {\n          window.location.reload()\n        }\n      })\n      </script>";
-            var htmlBuffer = fs_1.default.readFileSync(path_1.default.resolve(_this.workDir, 'dist/index.html'), {
-                encoding: 'utf-8',
-            });
+            var html = fsy.readFileSync(path_1.default.resolve(_this.outputPath, 'index.html')).toString();
             if (url === '/') {
-                var body = htmlBuffer.replace('</body>', injectScript + "</body>");
+                var body = html.replace('</body>', injectScript + "</body>");
                 res.end(body);
             }
-            next();
         });
     };
     return HMRCreator;
-}(eventEmitter_1.EventEmitter));
+}(EventEmitter_1.EventEmitter));
 exports.HMRCreator = HMRCreator;
